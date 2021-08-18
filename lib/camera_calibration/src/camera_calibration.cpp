@@ -1,14 +1,23 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
+#include<opencv2/core.hpp>
+#include<opencv2/imgcodecs.hpp>
+#include<opencv2/imgproc.hpp>
+#include<opencv2/highgui.hpp>
+
 #include "camera_calibration/camera_calibration.h"
 
 
 CameraCalibration::CameraCalibration(
 	const std::vector<cv::Mat>& calibration_images,
 	const cv::Size& chessboard_dimensions,
-	const double& square_edge_length
+	const double& calibration_square_length
 ) {
 	this->calibration_images = calibration_images;
 	this->chessboard_dimensions = chessboard_dimensions;
-	this->square_edge_length = square_edge_length;
+	this->calibration_square_length = calibration_square_length;
 
 	CreateReferenceChessboardCorners();
 	GetRealChessboardCorners();
@@ -30,7 +39,7 @@ CameraCalibration::CameraCalibration(
 void CameraCalibration::CreateReferenceChessboardCorners() {
 	for (int i = 0; i < chessboard_dimensions.height; ++i) {
 		for (int j = 0; j < chessboard_dimensions.width; ++j) {
-			reference_corner_points[0].push_back(cv::Point3f(j * square_edge_length, i * square_edge_length, 0.0f));
+			reference_corner_points[0].push_back(cv::Point3f(j * calibration_square_length, i * calibration_square_length, 0.0f));
 		}
 	}
 }
@@ -49,9 +58,10 @@ void CameraCalibration::GetRealChessboardCorners() {
 	}
 }
 
-bool CameraCalibration::SaveCameraCalibrationParameters(const std::string& filename) {
+bool CameraCalibration::SaveCalibrationParameters(const std::string& filename) {
 	std::ofstream fout(filename);
 	if (fout.is_open()) {
+		double buffer { 0.0f };
 		uint16_t rows;
 		uint16_t columns;
 		
@@ -63,8 +73,8 @@ bool CameraCalibration::SaveCameraCalibrationParameters(const std::string& filen
 
 		for (int row = 0; row < rows; row++) {
 			for (int col = 0; col < columns; col++) {
-				double value = camera_matrix.at<double>(row, col);
-				fout << value << std::endl;
+				buffer = camera_matrix.at<double>(row, col);
+				fout << buffer << std::endl;
 			}
 		}
 
@@ -76,8 +86,8 @@ bool CameraCalibration::SaveCameraCalibrationParameters(const std::string& filen
 		
 		for (int row = 0; row < rows; row++) {
 			for (int col = 0; col < columns; col++) {
-				double value = distortion_coefficients.at<double>(row, col);
-				fout << value << std::endl;
+				buffer = distortion_coefficients.at<double>(row, col);
+				fout << buffer << std::endl;
 			}
 		}
 
@@ -88,14 +98,18 @@ bool CameraCalibration::SaveCameraCalibrationParameters(const std::string& filen
 	return false;
 }
 
-bool CameraCalibration::LoadCameraCalibrationParameters(const std::string& filename) {
+bool CameraCalibration::LoadCalibrationParameters(const std::string& filename) {
 	std::ifstream fin(filename);
 	
-	std::cout << "Camera calibration parameters:" << std::endl;
+	std::cout << "--- Camera calibration parameters ---" << std::endl;
 
 	if (fin.is_open()) {
+		double buffer { 0.0f };
 		uint16_t rows;
 		uint16_t columns;
+
+
+		std::cout << "Camera matrix:" << std::endl;
 
 		fin >> rows;
 		fin >> columns;
@@ -104,26 +118,31 @@ bool CameraCalibration::LoadCameraCalibrationParameters(const std::string& filen
 
 		for (int row = 0; row < rows; row++) {
 			for (int col = 0; col < columns; col++) {
-				double read = 0.0f;
-				fin >> read;
-				camera_matrix.at<double>(row, col) = read;
+				buffer = 0.0f;
+				fin >> buffer;
+				camera_matrix.at<double>(row, col) = buffer;
 				std::cout << camera_matrix.at<double>(row, col) << std::endl;
 			}
+			std::cout << std::endl;
 		}
+		
+		std::cout << "Distortion coefficients:" << std::endl;
 
 		fin >> rows;
 		fin >> columns;
-
 		distortion_coefficients = cv::Mat::zeros(rows, columns, CV_64F);
 
 		for (int row = 0; row < rows; row++) {
 			for (int col = 0; col < columns; col++) {
-				double read = 0.0f;
-				fin >> read;
-				distortion_coefficients.at<double>(row, col) = read;
+				buffer = 0.0f;
+				fin >> buffer;
+				distortion_coefficients.at<double>(row, col) = buffer;
 				std::cout << distortion_coefficients.at<double>(row, col) << std::endl;
 			}
+			std::cout << std::endl;
 		}
+
+		std::cout << "-------------------------------------" << std::endl;
 
 		fin.close();
 		return true;
