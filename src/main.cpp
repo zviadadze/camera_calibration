@@ -53,7 +53,6 @@ int main() {
 			if (calibration_images.size() >= kCalibrationImagesCount) {
 				CameraCalibration camera_calibration(calibration_images, kChessboardDimensions, kCalibrationSquareLength);
 				camera_calibration.SaveCalibrationParameters(kCalibrationParametersFilename);
-				camera_calibration.LoadCalibrationParameters(kCalibrationParametersFilename);
 			} else {
 				std::cout << " - Not enough images for calibration [required images count: " << kCalibrationImagesCount << "]." << std::endl;
 			}
