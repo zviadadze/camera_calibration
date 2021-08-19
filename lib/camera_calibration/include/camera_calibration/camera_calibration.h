@@ -31,7 +31,7 @@ public:
     cv::Mat GetDistortionCoefficients() { return distortion_coefficients_; }
 
     bool SaveCalibrationParameters(const std::string& filename);
-    void UndistortPoint (cv::Point2f src, cv::Point2f dst, cv::Size image_size);
+    void UndistortPoint (const cv::Point2f& src, cv::Point2f& dst, const cv::Size& image_size);
 
 private:
 

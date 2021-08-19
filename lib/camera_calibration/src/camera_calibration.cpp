@@ -132,7 +132,7 @@ bool CameraCalibration::SaveCalibrationParameters(const std::string& filename) {
 	return false;
 }
 
-void CameraCalibration::UndistortPoint (cv::Point2f src, cv::Point2f dst, cv::Size image_size) {
+void CameraCalibration::UndistortPoint (const cv::Point2f& src, cv::Point2f& dst, const cv::Size& image_size) {
 	std::vector<cv::Point2f> src_temp = { src };
 	std::vector<cv::Point2f> dst_temp = { dst };
 
