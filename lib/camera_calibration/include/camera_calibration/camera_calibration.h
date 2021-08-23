@@ -1,7 +1,6 @@
 #ifndef CAMERA_CALIBRATION_H_
 #define CAMERA_CALIBRATION_H_
 
-
 #include<opencv2/calib3d.hpp>
 
 
@@ -73,6 +72,5 @@ public:
     );
 
 };
-
 
 #endif
