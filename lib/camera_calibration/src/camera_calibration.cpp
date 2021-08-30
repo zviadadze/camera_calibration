@@ -14,11 +14,13 @@
 CameraCalibration::CameraCalibration(
 	const std::vector<cv::Mat>& calibration_images,
 	const cv::Size& chessboard_dimensions,
-	const double& calibration_square_length
+	const double& calibration_square_length,
+	cv::TermCriteria accuracy_criteria
 ) {
-	this->calibration_images_ = calibration_images;
-	this->chessboard_dimensions_ = chessboard_dimensions;
-	this->calibration_square_length_ = calibration_square_length;
+	calibration_images_ = calibration_images;
+	chessboard_dimensions_ = chessboard_dimensions;
+	calibration_square_length_ = calibration_square_length;
+	accuracy_criteria_ = accuracy_criteria;
 
 	CreateReferenceChessboardCorners();
 	GetRealChessboardCorners();
@@ -54,7 +56,7 @@ void CameraCalibration::GetRealChessboardCorners() {
 			corners_buffer, 
 			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE)
 		) {
-			cv::cornerSubPix(*iter, corners_buffer, cv::Size(11, 11), cv::Size(-1, -1), criteria_);
+			cv::cornerSubPix(*iter, corners_buffer, cv::Size(11, 11), cv::Size(-1, -1), accuracy_criteria_);
 			chessboard_corner_points_.push_back(corners_buffer);
 		}
 	}

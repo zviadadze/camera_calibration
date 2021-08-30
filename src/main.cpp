@@ -10,6 +10,8 @@ int main() {
 	std::vector<cv::Mat> calibration_images;
 	cv::Mat camera_matrix = cv::Mat::eye(3, 3, CV_64F);
 	cv::Mat distortion_coefficients;
+
+	cv::TermCriteria accuracy_criteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.001);
 	
 	cv::VideoCapture cap(VideoSource::WEBCAM);
 	if (!cap.isOpened()) {
@@ -30,7 +32,12 @@ int main() {
 			break;
 		}
 
-		bool found = cv::findChessboardCorners(frame, kChessboardDimensions, found_corners, cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
+		bool found = cv::findChessboardCorners(
+			frame, 
+			kChessboardDimensions, 
+			found_corners, 
+			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE
+		);
 		if (found) {
 			frame.copyTo(draw_frame);
 			cv::drawChessboardCorners(draw_frame, kChessboardDimensions, found_corners, found);
@@ -53,10 +60,15 @@ int main() {
 			break;
 		case Buttons::ENTER:
 			if (calibration_images.size() >= kCalibrationImagesCount) {
-				CameraCalibration camera_calibration(calibration_images, kChessboardDimensions, kCalibrationSquareLength);
+				CameraCalibration camera_calibration(
+					calibration_images, 
+					kChessboardDimensions, 
+					kCalibrationSquareLength,
+					accuracy_criteria
+				);
 				camera_calibration.SaveCalibrationParameters(kCalibrationParametersFilename);
 			} else {
-				std::cout << " - Not enough images for calibration [required images count: " << kCalibrationImagesCount << "]." << std::endl;
+				std::cout << " - Not enough images for calibration [required amount: " << kCalibrationImagesCount << "]." << std::endl;
 			}
 			break;
 		case Buttons::ESC:
