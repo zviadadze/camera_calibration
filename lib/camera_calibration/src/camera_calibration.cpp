@@ -54,6 +54,7 @@ void CameraCalibration::GetRealChessboardCorners() {
 			corners_buffer, 
 			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE)
 		) {
+			cv::cornerSubPix(*iter, corners_buffer, cv::Size(11, 11), cv::Size(-1, -1), criteria_);
 			chessboard_corner_points_.push_back(corners_buffer);
 		}
 	}

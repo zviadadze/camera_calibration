@@ -51,6 +51,8 @@ private:
     std::vector<std::vector<cv::Point2f>> chessboard_corner_points_;
     std::vector<cv::Mat> rotation_vectors_, translation_vectors_;
 
+    cv::TermCriteria criteria_ { CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.001 };
+
 public:
 
     friend bool cv::findChessboardCorners(

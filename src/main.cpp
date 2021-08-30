@@ -47,6 +47,8 @@ int main() {
 				frame.copyTo(temp);
 				calibration_images.push_back(temp);
 				std::cout << " - Image saved [images count: " << calibration_images.size() << "]." << std::endl;
+			} else {
+				std::cout << " - Could not save image [pattern not found]. " << std::endl;
 			}
 			break;
 		case Buttons::ENTER:

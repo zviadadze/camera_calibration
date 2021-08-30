@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(cam_calibration)
+project(camera_calibration)
 
 enable_language(C)
 enable_language(CXX)
@@ -16,7 +16,7 @@ add_subdirectory(lib/camera_calibration)
 
 add_executable(${PROJECT_NAME} src/main.cpp include/main.h)
 
-target_link_libraries(${PROJECT_NAME} camera_calibration)
+target_link_libraries(${PROJECT_NAME} camera_calibration_lib)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE 
     CALIBRATION_PARAMETERS_FILENAME="${CMAKE_CURRENT_SOURCE_DIR}/share/calibration_paramters.txt"
