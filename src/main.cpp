@@ -7,8 +7,6 @@
 
 
 int main() {
-	cv::TermCriteria accuracy_criteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.001);
-
 	std::vector<cv::Mat> calibration_images;
 	cv::Mat camera_matrix = cv::Mat::eye(3, 3, CV_64F);
 	cv::Mat distortion_coefficients;
