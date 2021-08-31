@@ -17,9 +17,18 @@ public:
     }
     CameraCalibration(
         const std::vector<cv::Mat>& calibration_images,
-        const cv::Size& chessboard_dimensions,
-        const double& calibration_square_length,
-        cv::TermCriteria accuracy_criteria
+        const cv::Size& calibration_board_size,
+        const double& distance_between_real_points,
+        const cv::TermCriteria& accuracy_criteria =
+		    cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.0001)
+    );
+    CameraCalibration(
+        const std::vector<cv::Mat>& calibration_images,
+        const cv::Size& calibration_board_size,
+        const double& distance_between_real_points,
+        const cv::SimpleBlobDetector& circle_detector, 
+        const cv::TermCriteria& accuracy_criteria =
+		    cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.0001)
     );
     CameraCalibration(const CameraCalibration &) = delete;
     CameraCalibration(CameraCalibration &&) = delete;
@@ -36,31 +45,42 @@ public:
 private:
 
     bool LoadCalibrationParameters(const std::string& filename);
-    void CreateReferenceChessboardCorners();
-    void GetRealChessboardCorners();
+    void CreateReferenceGridPoints();
+    void GetRealChessboardPoints();
+    void GetRealCirclesGridPoints();
 
 private:
+
+    cv::Ptr<cv::SimpleBlobDetector> circle_detector_;
 
     cv::TermCriteria accuracy_criteria_;
 
     cv::Mat camera_matrix_;
     cv::Mat distortion_coefficients_;
-
-    std::vector<cv::Mat> calibration_images_;
-    cv::Size chessboard_dimensions_;
-    float calibration_square_length_;
-
-    std::vector<std::vector<cv::Point3f>> reference_corner_points_{1};
-    std::vector<std::vector<cv::Point2f>> chessboard_corner_points_;
     std::vector<cv::Mat> rotation_vectors_, translation_vectors_;
 
-public:
+    std::vector<cv::Mat> calibration_images_;
+    cv::Size calibration_board_size_;
+    float distance_between_real_points_;
+
+    std::vector<std::vector<cv::Point3f>> reference_points_{1};
+    std::vector<std::vector<cv::Point2f>> real_points_;
+    
+private:
 
     friend bool cv::findChessboardCorners(
         cv::InputArray image, 
         cv::Size patternSize, 
         cv::OutputArray corners, 
         int flags
+    );
+    friend bool findCirclesGrid(
+        cv::InputArray image, 
+        cv::Size patternSize,
+        cv::OutputArray centers, 
+        int flags = cv::CALIB_CB_SYMMETRIC_GRID,
+        const cv::Ptr<cv::FeatureDetector> &blobDetector = 
+            cv::SimpleBlobDetector::create()
     );
     friend double cv::calibrateCamera(
         cv::InputArrayOfArrays objectPoints, 

@@ -13,25 +13,25 @@
 
 CameraCalibration::CameraCalibration(
 	const std::vector<cv::Mat>& calibration_images,
-	const cv::Size& chessboard_dimensions,
-	const double& calibration_square_length,
-	cv::TermCriteria accuracy_criteria
+	const cv::Size& calibration_board_size,
+	const double& distance_between_real_points,
+	const cv::TermCriteria& accuracy_criteria
 ) {
 	calibration_images_ = calibration_images;
-	chessboard_dimensions_ = chessboard_dimensions;
-	calibration_square_length_ = calibration_square_length;
+	calibration_board_size_ = calibration_board_size;
+	distance_between_real_points_ = distance_between_real_points;
 	accuracy_criteria_ = accuracy_criteria;
 
-	CreateReferenceChessboardCorners();
-	GetRealChessboardCorners();
+	CreateReferenceGridPoints();
+	GetRealChessboardPoints();
 	
-	reference_corner_points_.resize(chessboard_corner_points_.size(), reference_corner_points_[0]);
+	reference_points_.resize(real_points_.size(), reference_points_[0]);
 	distortion_coefficients_ = cv::Mat::zeros(8, 1, CV_64F);
 
 	cv::calibrateCamera(
-		reference_corner_points_, 
-		chessboard_corner_points_, 
-		chessboard_dimensions_, 
+		reference_points_, 
+		real_points_, 
+		calibration_board_size_, 
 		camera_matrix_, 
 		distortion_coefficients_, 
 		rotation_vectors_, 
@@ -39,25 +39,72 @@ CameraCalibration::CameraCalibration(
 	);
 }
 
-void CameraCalibration::CreateReferenceChessboardCorners() {
-	for (int i = 0; i < chessboard_dimensions_.height; ++i) {
-		for (int j = 0; j < chessboard_dimensions_.width; ++j) {
-			reference_corner_points_[0].push_back(cv::Point3f(j * calibration_square_length_, i * calibration_square_length_, 0.0f));
+CameraCalibration::CameraCalibration(
+	const std::vector<cv::Mat>& calibration_images,
+	const cv::Size& calibration_board_size,
+	const double& distance_between_real_points,
+	const cv::SimpleBlobDetector& circle_detector,
+	const cv::TermCriteria& accuracy_criteria
+) {
+	calibration_images_ = calibration_images;
+	calibration_board_size_ = calibration_board_size;
+	distance_between_real_points_ = distance_between_real_points_;
+	circle_detector_ = cv::makePtr<cv::SimpleBlobDetector>(circle_detector);
+	accuracy_criteria_ = accuracy_criteria;
+
+	CreateReferenceGridPoints();
+	GetRealCirclesGridPoints();
+	
+	reference_points_.resize(real_points_.size(), reference_points_[0]);
+	distortion_coefficients_ = cv::Mat::zeros(8, 1, CV_64F);
+
+	cv::calibrateCamera(
+		reference_points_, 
+		real_points_, 
+		calibration_board_size_, 
+		camera_matrix_, 
+		distortion_coefficients_, 
+		rotation_vectors_, 
+		translation_vectors_
+	);
+}
+
+void CameraCalibration::CreateReferenceGridPoints() {
+	for (int i = 0; i < calibration_board_size_.height; ++i) {
+		for (int j = 0; j < calibration_board_size_.width; ++j) {
+			reference_points_[0].push_back(cv::Point3f(j * distance_between_real_points_, i * distance_between_real_points_, 0.0f));
 		}
 	}
 }
 
-void CameraCalibration::GetRealChessboardCorners() {
+void CameraCalibration::GetRealChessboardPoints() {
 	for (std::vector<cv::Mat>::iterator iter = calibration_images_.begin(); iter != calibration_images_.end(); ++iter) {
 		std::vector<cv::Point2f> corners_buffer;
 		if (cv::findChessboardCorners(
 			*iter, 
-			chessboard_dimensions_, 
+			calibration_board_size_, 
 			corners_buffer, 
 			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE)
 		) {
 			cv::cornerSubPix(*iter, corners_buffer, cv::Size(11, 11), cv::Size(-1, -1), accuracy_criteria_);
-			chessboard_corner_points_.push_back(corners_buffer);
+			real_points_.push_back(corners_buffer);
+		}
+	}
+}
+
+void CameraCalibration::GetRealCirclesGridPoints() {
+	for (std::vector<cv::Mat>::iterator iter = calibration_images_.begin(); iter != calibration_images_.end(); ++iter) {
+		std::vector<cv::Point2f> centers_buffer;
+		if (cv::findCirclesGrid(
+				*iter, 
+				calibration_board_size_, 
+				centers_buffer, 
+				cv::CALIB_CB_SYMMETRIC_GRID,
+				circle_detector_
+			)
+		) {
+			cv::cornerSubPix(*iter, centers_buffer, cv::Size(11, 11), cv::Size(-1, -1), accuracy_criteria_);
+			real_points_.push_back(centers_buffer);
 		}
 	}
 }
