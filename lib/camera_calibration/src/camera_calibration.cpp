@@ -43,13 +43,15 @@ CameraCalibration::CameraCalibration(
 	const std::vector<cv::Mat>& calibration_images,
 	const cv::Size& calibration_board_size,
 	const double& distance_between_real_points,
-	const cv::SimpleBlobDetector& circle_detector,
+	const cv::Ptr<cv::SimpleBlobDetector>& circle_detector,
+	const CirclePatternType& circle_pattern_type,
 	const cv::TermCriteria& accuracy_criteria
 ) {
 	calibration_images_ = calibration_images;
 	calibration_board_size_ = calibration_board_size;
 	distance_between_real_points_ = distance_between_real_points_;
-	circle_detector_ = cv::makePtr<cv::SimpleBlobDetector>(circle_detector);
+	circle_detector_ = circle_detector;
+	circle_pattern_type_ = circle_pattern_type;
 	accuracy_criteria_ = accuracy_criteria;
 
 	CreateReferenceGridPoints();
@@ -95,14 +97,27 @@ void CameraCalibration::GetRealChessboardPoints() {
 void CameraCalibration::GetRealCirclesGridPoints() {
 	for (std::vector<cv::Mat>::iterator iter = calibration_images_.begin(); iter != calibration_images_.end(); ++iter) {
 		std::vector<cv::Point2f> centers_buffer;
-		if (cv::findCirclesGrid(
+		bool grid_found = false;
+
+		if (circle_pattern_type_ == CameraCalibration::CirclePatternType::SYMMETRIC) {
+			grid_found = cv::findCirclesGrid(
 				*iter, 
 				calibration_board_size_, 
 				centers_buffer, 
 				cv::CALIB_CB_SYMMETRIC_GRID,
 				circle_detector_
-			)
-		) {
+			);
+		} else if (circle_pattern_type_ == CameraCalibration::CirclePatternType::ASYMMETRIC) {
+			grid_found = cv::findCirclesGrid(
+				*iter, 
+				calibration_board_size_, 
+				centers_buffer, 
+				cv::CALIB_CB_ASYMMETRIC_GRID,
+				circle_detector_
+			);
+		}
+
+		if (grid_found) {
 			cv::cornerSubPix(*iter, centers_buffer, cv::Size(11, 11), cv::Size(-1, -1), accuracy_criteria_);
 			real_points_.push_back(centers_buffer);
 		}
