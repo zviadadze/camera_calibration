@@ -9,7 +9,7 @@ enum VideoSource {
 	WEBCAM = 0
 };
 
-enum Buttons {
+enum Button {
 	SPACE = 32,
 	ENTER = 13,
 	ESC = 27

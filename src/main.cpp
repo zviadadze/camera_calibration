@@ -49,7 +49,7 @@ int main() {
 		
 		char key = cv::waitKey(1000 / FPS);
 		switch (key) {
-		case Buttons::SPACE:
+		case Button::SPACE:
 			if (found) {
 				cv::Mat temp;
 				frame.copyTo(temp);
@@ -59,7 +59,7 @@ int main() {
 				std::cout << " - Could not save image [pattern not found]. " << std::endl;
 			}
 			break;
-		case Buttons::ENTER:
+		case Button::ENTER:
 			if (calibration_images.size() >= kCalibrationImagesCount) {
 				CameraCalibration camera_calibration(
 					calibration_images, 
@@ -73,7 +73,7 @@ int main() {
 				std::cout << " - Not enough images for calibration [required amount: " << kCalibrationImagesCount << "]." << std::endl;
 			}
 			break;
-		case Buttons::ESC:
+		case Button::ESC:
 			active = false;
 			break;
 		}
