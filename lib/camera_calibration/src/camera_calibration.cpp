@@ -17,7 +17,10 @@ CameraCalibration::CameraCalibration(
 	const double& distance_between_real_points,
 	const cv::TermCriteria& accuracy_criteria
 ) {
-	calibration_images_ = calibration_images;
+	calibration_images_.resize(calibration_images.size());
+	for(int i = 0; i < calibration_images_.size(); ++i) {
+		cv::cvtColor(calibration_images[i], calibration_images_[i], cv::COLOR_BGR2GRAY);
+	}
 	calibration_board_size_ = calibration_board_size;
 	distance_between_real_points_ = distance_between_real_points;
 	accuracy_criteria_ = accuracy_criteria;
@@ -47,7 +50,10 @@ CameraCalibration::CameraCalibration(
 	const CirclePatternType& circle_pattern_type,
 	const cv::TermCriteria& accuracy_criteria
 ) {
-	calibration_images_ = calibration_images;
+	calibration_images_.resize(calibration_images.size());
+	for(int i = 0; i < calibration_images_.size(); ++i) {
+		cv::cvtColor(calibration_images[i], calibration_images_[i], cv::COLOR_BGR2GRAY);
+	}
 	calibration_board_size_ = calibration_board_size;
 	distance_between_real_points_ = distance_between_real_points_;
 	circle_detector_ = circle_detector;
