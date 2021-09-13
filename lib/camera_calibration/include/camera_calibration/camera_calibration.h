@@ -44,15 +44,24 @@ public:
     CameraCalibration &operator=(CameraCalibration &&) = delete;
     ~CameraCalibration() {};
 
+
     cv::Mat GetCameraMatrix() { return camera_matrix_; }
     cv::Mat GetDistortionCoefficients() { return distortion_coefficients_; }
 
+    void SetCameraMatrix(const cv::Mat& camera_matrix) {
+        camera_matrix_ = camera_matrix;
+    }
+    void SetDistortionCoefficients(const cv::Mat& distortion_coefficients) {
+        distortion_coefficients_ = distortion_coefficients;
+    }
+
     bool SaveCalibrationParameters(const std::string& filename);
+    bool LoadCalibrationParameters(const std::string& filename);
+
     void UndistortPoint (const cv::Point2f& src, cv::Point2f& dst, const cv::Size& image_size);    
 
 private:
 
-    bool LoadCalibrationParameters(const std::string& filename);
     void CreateReferenceGridPoints();
     void GetRealChessboardPoints();
     void GetRealCirclesGridPoints();
