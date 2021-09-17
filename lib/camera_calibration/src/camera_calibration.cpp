@@ -12,56 +12,30 @@
 
 
 CameraCalibration::CameraCalibration(
-	const std::vector<cv::Mat>& calibration_images,
-	const cv::Size& calibration_board_size,
-	const double& distance_between_real_points,
-	const cv::TermCriteria& accuracy_criteria
+	const std::vector<cv::Mat> &calibration_images,
+	const cv::Size &calibration_board_size,
+	const double &distance_between_real_points,
+	const CalibrationGridPattern &calibration_grid_pattern,
+    const cv::Ptr<cv::SimpleBlobDetector> &circle_detector,
+	const cv::TermCriteria &accuracy_criteria
 ) {
 	calibration_images_.resize(calibration_images.size());
-	for(int i = 0; i < calibration_images_.size(); ++i) {
+	for (int i = 0; i < calibration_images_.size(); ++i) {
 		cv::cvtColor(calibration_images[i], calibration_images_[i], cv::COLOR_BGR2GRAY);
 	}
 	calibration_board_size_ = calibration_board_size;
 	distance_between_real_points_ = distance_between_real_points;
-	accuracy_criteria_ = accuracy_criteria;
-
-	CreateReferenceGridPoints();
-	GetRealChessboardPoints();
-	
-	reference_points_.resize(real_points_.size(), reference_points_[0]);
-	distortion_coefficients_ = cv::Mat::zeros(8, 1, CV_64F);
-
-	cv::calibrateCamera(
-		reference_points_, 
-		real_points_, 
-		calibration_board_size_, 
-		camera_matrix_, 
-		distortion_coefficients_, 
-		rotation_vectors_, 
-		translation_vectors_
-	);
-}
-
-CameraCalibration::CameraCalibration(
-	const std::vector<cv::Mat>& calibration_images,
-	const cv::Size& calibration_board_size,
-	const double& distance_between_real_points,
-	const cv::Ptr<cv::SimpleBlobDetector>& circle_detector,
-	const CirclePatternType& circle_pattern_type,
-	const cv::TermCriteria& accuracy_criteria
-) {
-	calibration_images_.resize(calibration_images.size());
-	for(int i = 0; i < calibration_images_.size(); ++i) {
-		cv::cvtColor(calibration_images[i], calibration_images_[i], cv::COLOR_BGR2GRAY);
-	}
-	calibration_board_size_ = calibration_board_size;
-	distance_between_real_points_ = distance_between_real_points_;
+	calibration_grid_pattern_ = calibration_grid_pattern;
 	circle_detector_ = circle_detector;
-	circle_pattern_type_ = circle_pattern_type;
 	accuracy_criteria_ = accuracy_criteria;
 
 	CreateReferenceGridPoints();
-	GetRealCirclesGridPoints();
+
+	if (calibration_grid_pattern_ = CalibrationGridPattern::CHESSBOARD)
+		GetRealChessboardPoints();
+	else {
+		GetRealCirclesGridPoints();
+	}
 	
 	reference_points_.resize(real_points_.size(), reference_points_[0]);
 	distortion_coefficients_ = cv::Mat::zeros(8, 1, CV_64F);
@@ -103,18 +77,18 @@ void CameraCalibration::GetRealChessboardPoints() {
 void CameraCalibration::GetRealCirclesGridPoints() {
 	for (std::vector<cv::Mat>::iterator iter = calibration_images_.begin(); iter != calibration_images_.end(); ++iter) {
 		std::vector<cv::Point2f> centers_buffer;
-		bool grid_found = false;
+		bool pattern_found = false;
 
-		if (circle_pattern_type_ == CameraCalibration::CirclePatternType::SYMMETRIC) {
-			grid_found = cv::findCirclesGrid(
+		if (calibration_grid_pattern_ == CameraCalibration::CalibrationGridPattern::SYMMETRIC_CIRCLE_GRID) {
+			pattern_found = cv::findCirclesGrid(
 				*iter, 
 				calibration_board_size_, 
 				centers_buffer, 
 				cv::CALIB_CB_SYMMETRIC_GRID,
 				circle_detector_
 			);
-		} else if (circle_pattern_type_ == CameraCalibration::CirclePatternType::ASYMMETRIC) {
-			grid_found = cv::findCirclesGrid(
+		} else if (calibration_grid_pattern_ == CameraCalibration::CalibrationGridPattern::ASYMMETRIC_CIRCLE_GRID) {
+			pattern_found = cv::findCirclesGrid(
 				*iter, 
 				calibration_board_size_, 
 				centers_buffer, 
@@ -123,14 +97,14 @@ void CameraCalibration::GetRealCirclesGridPoints() {
 			);
 		}
 
-		if (grid_found) {
+		if (pattern_found) {
 			cv::cornerSubPix(*iter, centers_buffer, cv::Size(11, 11), cv::Size(-1, -1), accuracy_criteria_);
 			real_points_.push_back(centers_buffer);
 		}
 	}
 }
 
-bool CameraCalibration::LoadCalibrationParameters(const std::string& filename) {
+bool CameraCalibration::LoadCalibrationParameters(const std::string &filename) {
 	std::ifstream fin(filename);
 
 	if (fin.is_open()) {
@@ -167,7 +141,7 @@ bool CameraCalibration::LoadCalibrationParameters(const std::string& filename) {
 	return false;
 }
 
-bool CameraCalibration::SaveCalibrationParameters(const std::string& filename) {
+bool CameraCalibration::SaveCalibrationParameters(const std::string &filename) {
 	std::ofstream fout(filename);
 	if (fout.is_open()) {
 		double buffer { 0.0f };
@@ -203,7 +177,7 @@ bool CameraCalibration::SaveCalibrationParameters(const std::string& filename) {
 	return false;
 }
 
-void CameraCalibration::UndistortPoint (const cv::Point2f& src, cv::Point2f& dst, const cv::Size& image_size) {
+void CameraCalibration::UndistortPoint (const cv::Point2f &src, cv::Point2f &dst, const cv::Size &image_size) {
 	std::vector<cv::Point2f> src_temp = { src };
 	std::vector<cv::Point2f> dst_temp = { dst };
 

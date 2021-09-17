@@ -8,9 +8,10 @@ class CameraCalibration {
 
 public:
 
-    enum CirclePatternType {
-            SYMMETRIC,
-            ASYMMETRIC
+    enum CalibrationGridPattern {
+            CHESSBOARD,
+            SYMMETRIC_CIRCLE_GRID,
+            ASYMMETRIC_CIRCLE_GRID
     };
 
 public:
@@ -23,19 +24,13 @@ public:
         this->distortion_coefficients_ = distortion_coefficients;
     }
     CameraCalibration(
-        const std::vector<cv::Mat>& calibration_images,
-        const cv::Size& calibration_board_size,
-        const double& distance_between_real_points,
-        const cv::TermCriteria& accuracy_criteria =
-		    cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.0001)
-    );
-    CameraCalibration(
-        const std::vector<cv::Mat>& calibration_images,
-        const cv::Size& calibration_board_size,
-        const double& distance_between_real_points,
-        const cv::Ptr<cv::SimpleBlobDetector>& circle_detector, 
-        const CirclePatternType& circle_pattern_type,
-        const cv::TermCriteria& accuracy_criteria =
+        const std::vector<cv::Mat> &calibration_images,
+        const cv::Size &calibration_board_size,
+        const double &distance_between_real_points,
+        const CalibrationGridPattern &calibration_grid_pattern,
+        const cv::Ptr<cv::SimpleBlobDetector> &circle_detector =
+            cv::SimpleBlobDetector::create(),
+        const cv::TermCriteria &accuracy_criteria =
 		    cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.0001)
     );
     CameraCalibration(const CameraCalibration &) = delete;
@@ -47,18 +42,14 @@ public:
 
     cv::Mat GetCameraMatrix() { return camera_matrix_; }
     cv::Mat GetDistortionCoefficients() { return distortion_coefficients_; }
-
-    void SetCameraMatrix(const cv::Mat& camera_matrix) {
-        camera_matrix_ = camera_matrix;
-    }
-    void SetDistortionCoefficients(const cv::Mat& distortion_coefficients) {
+    void SetCameraMatrix(const cv::Mat &camera_matrix) { camera_matrix_ = camera_matrix; }
+    void SetDistortionCoefficients(const cv::Mat &distortion_coefficients) {
         distortion_coefficients_ = distortion_coefficients;
     }
 
-    bool SaveCalibrationParameters(const std::string& filename);
-    bool LoadCalibrationParameters(const std::string& filename);
-
-    void UndistortPoint (const cv::Point2f& src, cv::Point2f& dst, const cv::Size& image_size);    
+    bool SaveCalibrationParameters(const std::string &filename);
+    bool LoadCalibrationParameters(const std::string &filename);
+    void UndistortPoint (const cv::Point2f &src, cv::Point2f &dst, const cv::Size &image_size);    
 
 private:
 
@@ -81,7 +72,7 @@ private:
     std::vector<std::vector<cv::Point2f>> real_points_;
     
     cv::Ptr<cv::SimpleBlobDetector> circle_detector_;
-    CirclePatternType circle_pattern_type_;
+    CalibrationGridPattern calibration_grid_pattern_;
 
     cv::TermCriteria accuracy_criteria_;
     
