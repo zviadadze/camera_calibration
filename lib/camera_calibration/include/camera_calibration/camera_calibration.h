@@ -48,8 +48,7 @@ public:
     }
 
     bool SaveCalibrationParameters(const std::string &filename);
-    bool LoadCalibrationParameters(const std::string &filename);
-    void UndistortPoint (const cv::Point2f &src, cv::Point2f &dst, const cv::Size &image_size);    
+    bool LoadCalibrationParameters(const std::string &filename);    
 
 private:
 
@@ -105,6 +104,14 @@ private:
     );
 
 };
+
+void UndistortPoint (
+    const cv::Point2f &src, 
+    cv::Point2f &dst, 
+    const cv::Mat &camera_matrix,
+    const cv::Mat  distortion_coefficients, 
+    const cv::Size &image_size
+);
 
 
 #endif

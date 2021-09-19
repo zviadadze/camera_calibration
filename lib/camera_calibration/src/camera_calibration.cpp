@@ -177,16 +177,22 @@ bool CameraCalibration::SaveCalibrationParameters(const std::string &filename) {
 	return false;
 }
 
-void CameraCalibration::UndistortPoint (const cv::Point2f &src, cv::Point2f &dst, const cv::Size &image_size) {
-	std::vector<cv::Point2f> src_temp = { src };
-	std::vector<cv::Point2f> dst_temp = { dst };
+void UndistortPoint (
+    const cv::Point2f &src, 
+    cv::Point2f &dst, 
+    const cv::Mat &camera_matrix,
+    const cv::Mat  distortion_coefficients, 
+    const cv::Size &image_size = cv::Size(-1, -1)
+) {
+	std::vector<cv::Point2f> src_temp { src };
+	std::vector<cv::Point2f> dst_temp { dst };
 
 	if (image_size == cv::Size(-1, -1)) {	
-		cv::undistortPoints(src_temp, dst_temp, camera_matrix_, distortion_coefficients_);
+		cv::undistortPoints(src_temp, dst_temp, camera_matrix, distortion_coefficients);
 	} else {
 		cv::Mat optimal_camera_matrix =
-			cv::getOptimalNewCameraMatrix(camera_matrix_, distortion_coefficients_, image_size, 1.0);
-		cv::undistortPoints(src_temp, dst_temp, optimal_camera_matrix, distortion_coefficients_);
+			cv::getOptimalNewCameraMatrix(camera_matrix, distortion_coefficients, image_size, 1.0);
+		cv::undistortPoints(src_temp, dst_temp, optimal_camera_matrix, distortion_coefficients);
 	}
 
 	dst = dst_temp[0];

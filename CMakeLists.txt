@@ -10,17 +10,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(OpenCV 3.2 REQUIRED)
 
 include_directories(lib/camera_calibration/include)
+include_directories(lib/json)
 include_directories(include)
 
 add_subdirectory(lib/camera_calibration)
 
-add_executable(${PROJECT_NAME} src/main.cpp include/main.h)
+
+set(HEADERS include/main_structures.h include/main_functions.h)
+
+set(SOURCES src/main.cpp src/main_functions.cpp lib/json/json.hpp)
+
+add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} camera_calibration_lib)
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE 
-    CALIBRATION_PARAMETERS_FILENAME="${CMAKE_CURRENT_SOURCE_DIR}/share/calibration_paramters.txt"
-)
 
 set(COMMON_C_FLAGS "-pipe -Wall -Wextra -fno-omit-frame-pointer")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_C_FLAGS} ${CMAKE_THREAD_LIBS_INIT}")
