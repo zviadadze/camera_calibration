@@ -68,7 +68,7 @@ void CameraCalibration::GetRealChessboardPoints() {
 			corners_buffer, 
 			cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE)
 		) {
-			cv::cornerSubPix(*iter, corners_buffer, cv::Size(11, 11), cv::Size(-1, -1), accuracy_criteria_);
+			cv::cornerSubPix(*iter, corners_buffer, SEARCH_WINDOW_SIZE_, ZERO_ZONE_SIZE_, accuracy_criteria_);
 			real_points_.push_back(corners_buffer);
 		}
 	}
@@ -98,7 +98,7 @@ void CameraCalibration::GetRealCirclesGridPoints() {
 		}
 
 		if (pattern_found) {
-			cv::cornerSubPix(*iter, centers_buffer, cv::Size(11, 11), cv::Size(-1, -1), accuracy_criteria_);
+			cv::cornerSubPix(*iter, centers_buffer, SEARCH_WINDOW_SIZE_, ZERO_ZONE_SIZE_, accuracy_criteria_);
 			real_points_.push_back(centers_buffer);
 		}
 	}

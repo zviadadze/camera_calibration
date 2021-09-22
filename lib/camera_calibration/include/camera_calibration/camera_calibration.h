@@ -31,7 +31,10 @@ public:
         const cv::Ptr<cv::SimpleBlobDetector> &circle_detector =
             cv::SimpleBlobDetector::create(),
         const cv::TermCriteria &accuracy_criteria =
-		    cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.0001)
+		    cv::TermCriteria(
+                cv::TermCriteria::EPS + cv::TermCriteria::COUNT,
+                CameraCalibration::MAX_IREATIONS_COUNT_, 
+                CameraCalibration::EPSILON_)
     );
     CameraCalibration(const CameraCalibration &) = delete;
     CameraCalibration(CameraCalibration &&) = delete;
@@ -56,6 +59,11 @@ private:
     void GetRealChessboardPoints();
     void GetRealCirclesGridPoints();
 
+public:
+
+    static constexpr int MAX_IREATIONS_COUNT_ { 30 };
+    static constexpr double EPSILON_ { 0.0001 };
+
 private:
 
     cv::Mat camera_matrix_;
@@ -65,7 +73,7 @@ private:
     
     std::vector<cv::Mat> calibration_images_;
     cv::Size calibration_board_size_;
-    float distance_between_real_points_;
+    double distance_between_real_points_;
 
     std::vector<std::vector<cv::Point3f>> reference_points_{1};
     std::vector<std::vector<cv::Point2f>> real_points_;
@@ -74,6 +82,9 @@ private:
     CalibrationGridPattern calibration_grid_pattern_;
 
     cv::TermCriteria accuracy_criteria_;
+
+    const cv::Size SEARCH_WINDOW_SIZE_ {11, 11};
+    const cv::Size ZERO_ZONE_SIZE_ {11, 11};
     
 private:
 

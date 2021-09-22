@@ -5,7 +5,7 @@
 #include <opencv2/core/utility.hpp>
 #include <opencv2/highgui.hpp>
 
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 
 #include "camera_calibration/camera_calibration.h"
 
@@ -28,11 +28,10 @@ int main(int argc, char* argv[]) {
 	cv::CommandLineParser parser(argc, argv, kKeys);
 	parser.about("Сamera calibration v1.0.0");
 
-	if(!parser.has("help") && !parser.has("create") && !parser.has("read")) {
+	if (!parser.has("help") && !parser.has("create") && !parser.has("read")) {
 		return Status::GOOD;
 	}
 
-	// ИСПРАВИТЬ ПАРСЕР
     if (parser.has("help")) {
         parser.printMessage();
         return Status::GOOD;
@@ -77,8 +76,13 @@ int main(int argc, char* argv[]) {
 	cv::SimpleBlobDetector::Params circle_detector_settings;
 	cv::Ptr<cv::SimpleBlobDetector> circle_detector;
 
-	if ((calibration_settings.board_type == 1 || calibration_settings.board_type == 2) && 
-		calibration_settings.circle_detector_settings_path != "empty") {
+	if (calibration_settings.board_type == BoardType::SYMMETRIC_CIRCLE_GRID || 
+		calibration_settings.board_type == BoardType::ASYMMETRIC_CIRCLE_GRID) {
+		if (calibration_settings.circle_detector_settings_path != "empty") {
+			std::cout << " - Circle detector settings path is not specified." << std::endl;
+			return Status::BAD;
+		}
+
 		std::ifstream fin(calibration_settings.circle_detector_settings_path);
 		nlohmann::json circle_detector_settings_json;
 		fin >> circle_detector_settings_json;
@@ -98,7 +102,8 @@ int main(int argc, char* argv[]) {
 	std::vector<cv::Mat> calibration_images;
 
 	cv::VideoCapture cap;
-	if (calibration_settings.video_source == "0"){
+	// "0" equals webcam  
+	if (calibration_settings.video_source == "0") {
 		cap.open(0);
 	} else {
 		cap.open(calibration_settings.video_source);

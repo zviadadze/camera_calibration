@@ -1,8 +1,9 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#include <opencv2/core/types.hpp>
 #include <string>
+
+#include <opencv2/core/types.hpp>
 
 
 enum Button {
