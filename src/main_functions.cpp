@@ -5,7 +5,8 @@
 #include "main_functions.h"
 
 
-bool CreateCalibrationSettingsFile(const std::string &calibration_settings_file) {
+bool CreateCalibrationSettingsFile(const std::string& calibration_settings_file)
+{
     std::string camera_parameters_file_path;
     std::string video_source;
     int required_images_count;
@@ -64,9 +65,9 @@ bool CreateCalibrationSettingsFile(const std::string &calibration_settings_file)
 }
 
 bool GetCalibrationSettings(
-    const nlohmann::json &calibration_settings_json, 
-    CalibrationSettings &calibration_settings
-) {
+    const nlohmann::json& calibration_settings_json, 
+    CalibrationSettings& calibration_settings) 
+{
     calibration_settings.camera_parameters_file_path = calibration_settings_json["camera_parameters_file_path"].get<std::string>();
     calibration_settings.video_source = calibration_settings_json["video_source"].get<std::string>();
     calibration_settings.required_images_count = calibration_settings_json["required_images_count"].get<int>();
@@ -81,8 +82,8 @@ bool GetCalibrationSettings(
 
 bool GetCircleDetectorSettings(
     const nlohmann::json circle_detector_settings_json,
-    cv::SimpleBlobDetector::Params &circle_detector_settings
-) {
+    cv::SimpleBlobDetector::Params& circle_detector_settings)
+{
     circle_detector_settings.maxArea = circle_detector_settings_json["maxArea"].get<int>();
 	circle_detector_settings.minArea = circle_detector_settings_json["minArea"].get<int>();
 	circle_detector_settings.minThreshold = circle_detector_settings_json["minThreshold"].get<int>();

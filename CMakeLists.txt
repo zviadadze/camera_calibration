@@ -11,8 +11,7 @@ find_package(OpenCV 3.2 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH
     ${CMAKE_SOURCE_DIR}/cmake-modules
-    ${CMAKE_SOURCE_DIR}/cmake
-)
+    ${CMAKE_SOURCE_DIR}/cmake)
 
 include_directories(include)
 include_directories(lib/json/include)
