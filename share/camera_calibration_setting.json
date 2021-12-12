@@ -1,0 +1,8 @@
+{
+  "calibration_grid_pattern": "chessboard",
+  "calibration_board_size": [ 6, 4 ],
+  "distance_between_points": 0.0265,
+  "image_source_type": "stream",
+  "image_source_path": "http://192.168.0.191:8080/video",
+  "camera_parameters_file_path": "/home/zviadadze/programs/camera_calibration/share/camera_parameters.txt"
+}
