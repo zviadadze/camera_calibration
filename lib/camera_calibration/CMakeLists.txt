@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(camera_calibration_lib)
+project(camera_calibration_library)
 
 set(INCLUDE_BASE_DIR include)
 set(INCLUDE_DIR ${INCLUDE_BASE_DIR}/camera_calibration)

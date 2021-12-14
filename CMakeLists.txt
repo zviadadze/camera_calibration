@@ -30,6 +30,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME} 
-    camera_calibration_lib
+    camera_calibration_library
     ${OpenCV_LIBS}
 )

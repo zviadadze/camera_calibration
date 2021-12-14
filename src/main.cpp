@@ -96,6 +96,7 @@ int main(int argc, char* argv[])
     cv::String image_source_type { settings.GetImageSourceType() };
     cv::String image_source_path { settings.GetImageSourcePath() };
     int calibration_image_count { 0 };
+    bool do_calibration { false };
 
     if (image_source_type == "stream") {
         cv::VideoCapture cap;
@@ -117,7 +118,7 @@ int main(int argc, char* argv[])
             cv::Mat image;
             cv::Mat draw_image;
             std::vector<cv::Vec2f> found_points;
-
+            
             if (!cap.read(image)) {
                 std::cout << " - Unable to read image from source." << std::endl;
                 std::cout << " - Session ended." << std::endl;
@@ -154,6 +155,7 @@ int main(int argc, char* argv[])
             case Button::ENTER :
                 if (calibration_image_count >= required_minimum_image_number) {
                     stop_stream = true;
+                    do_calibration = true;
                 }
                 else {
                     std::cout << " - Insufficient number of calibration images. Required number: " << 
@@ -190,13 +192,14 @@ int main(int argc, char* argv[])
     }
 
 
-    std::cout << " - Camera calibration has started. " << std::endl;
+    if (do_calibration) {
+        std::cout << " - Camera calibration has started. " << std::endl;
+        camera_calibration::CameraCalibration(settings, calibration_images).
+            ExtractCameraParameters().SaveToFile(settings.GetCameraParametersFilePath());
+        std::cout << " - Camera calibration has been completed. " << std::endl;
+        std::cout << " - Calibration parameters saved to: " << settings.GetCameraParametersFilePath() << std::endl;
+    }
 
-    camera_calibration::CameraCalibration(settings, calibration_images).
-        ExtractCameraParameters().SaveToFile(settings.GetCameraParametersFilePath());
-
-    std::cout << " - Camera calibration has been completed. " << std::endl;
-    std::cout << " - Calibration parameters saved to: " << settings.GetCameraParametersFilePath() << std::endl;
     std::cout << " - Session ended." << std::endl;
 
     return ExitStatus::SUCCESS;
